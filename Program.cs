@@ -5,100 +5,141 @@
         static void Main(string[] args)
         {
 
-
-
             bool isExit = false;
+            bool isLoggedIn = false;
             do
             {
                 Console.WriteLine("Welcome!");
                 Console.WriteLine("Please select the operation:");
-                Console.WriteLine("1. Login");
+                if (!isLoggedIn) Console.WriteLine("1. Login");
                 Console.WriteLine("2. Logout");
                 Console.WriteLine("3. Verify login's date");
                 Console.WriteLine("4. Access List");
                 Console.WriteLine("5. Exit");
 
-                bool isLoggedIn;
-
+                Console.WriteLine();
+                Console.Write("Insert your option: ");
                 int selectedOption = int.Parse(Console.ReadLine());
                 switch (selectedOption)
                 {
                     case 1:
-                        Console.WriteLine("Welcome to Login procedure, please insert your username and password:");
-                        Console.Write("Username: ");
-                        string username = Console.ReadLine();
-                        Console.Write("Password: ");
-                        string password = Console.ReadLine();
-                        Utente.Login(username, password);
-
-
-                        if (!Utente.IsLoggedIn)
+                        if (!isLoggedIn)
                         {
-                            Console.WriteLine("Error: Your username and/or password are invalid.");
-                            Console.Write("Press any key to go back to the main menù... ");
-                            Console.ReadKey();
+
+                            Console.WriteLine("Welcome to Login procedure, please insert your username and password:");
+                            Console.Write("Username: ");
+                            string username = Console.ReadLine();
+                            Console.Write("Password: ");
+                            string password = Console.ReadLine();
+                            Console.Write("Confirm password:");
+                            string confirmPsw = Console.ReadLine();
+
+                            if (password == confirmPsw)
+                            {
+                                isLoggedIn = Utente.Login(username, password);
+
+                            }
+                            else
+                            {
+                                Console.Write("Your confirmed password is different from the first one. Press any key to return to menù... ");
+                            }
+
+                            if (!isLoggedIn)
+                            {
+                                Console.WriteLine("Error: Your username and/or password are invalid.");
+                                Console.Write("Press any key to return to menù... ");
+                                break;
+                            }
                         }
+
+                        Console.Write("Welcome user! Press any key to return to menù... ");
 
                         break;
 
                     case 2:
-                        if (!Utente.IsLoggedIn)
+                        if (!isLoggedIn)
                         {
-                            Console.WriteLine("You are already logged out, press any key to return to menù");
+                            Console.Write("Error: You are already logged out. Press any key to return to menù... ");
                             break;
                         }
-                        Console.WriteLine("You are now logging out...");
+                        Console.Write("You are now logging out. Press any key to return to menù... ");
+                        isLoggedIn = false;
+                        break;
+
+                    case 3:
+                        if (!isLoggedIn)
+                        {
+                            Console.Write("Error: You are not logged in. Press any key to return to menù... ");
+                            break;
+                        }
+                        Console.Write("Here is when you last logged in: " + Utente.GetLastLoginDate());
+                        Console.WriteLine();
+                        Console.Write("Press any key to return to menù...");
+                        break;
+
+                    case 4:
+                        if (!isLoggedIn)
+                        {
+                            Console.Write("Error: You are not logged in. Press any key to return to menù... ");
+                            break;
+                        }
+
+                        List<DateTime> historyAccess = Utente.GetHistoryAccess();
+                        Console.WriteLine("Here is your list of accesses");
+                        foreach (DateTime access in historyAccess)
+                        {
+                            Console.Write($"| {access} ");
+                        }
+                        Console.WriteLine();
+                        Console.Write("Press any key to return to menù... ");
+
+                        break;
+
+                    case 5:
+                        isExit = true;
+                        Console.WriteLine();
+                        Console.Write("Thank you for using our services. Press any key to Exit... ");
                         break;
                 }
 
+                Console.ReadKey();
+                Console.Clear();
 
             } while (!isExit);
 
-            Console.ReadKey();
+
+
+
         }
     }
 
 
     static class Utente
     {
-        const string ACTUAL_USER = "Lello";
-        const string ACTUAL_PSW = "password";
-        static string _username;
-        static string _password;
+        static string _username = "qw";
+        static string _password = "po";
 
-        static bool _isLoggedIn = false;
+
         static List<DateTime> historyAccess = new List<DateTime>();
-
-        public static bool IsLoggedIn { get; }
 
         public static bool Login(string username, string password)
         {
-            if (ACTUAL_USER == username && ACTUAL_PSW == password)
+            if (_username == username && _password == password)
             {
-                _username = username;
-                _password = password;
-                _isLoggedIn = true;
                 historyAccess.Add(DateTime.Now);
-
-                return _isLoggedIn;
-            }
-            _isLoggedIn = false;
-            return _isLoggedIn;
-        }
-
-        public static bool Logout()
-        {
-            if (_isLoggedIn)
-            {
-                _username = null;
-                _password = null;
-                _isLoggedIn = false;
-
                 return true;
             }
             return false;
 
+        }
 
+        public static bool Logout(bool isLoggedIn)
+        {
+            if (isLoggedIn)
+            {
+                return true;
+            }
+            return false;
         }
 
         public static List<DateTime> GetHistoryAccess()
